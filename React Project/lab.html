@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFO Page Replacement Program</title>
+
+    <style>
+        input{
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the FIFO Page Replacement Program:</h1>
+    <label for="numPages">How many pages? </label>
+    <input type="number" id="pages">
+    <br>
+    <label for="pageList">List of pages: </label>
+    <input type="text" id="pageList">
+    <br>
+    <label for="pageSequence">Enter the page sequence: </label>
+    <input type="text" id="pageSequence">
+    <br>
+    <label for="numFrames">How many frames? </label>
+    <input type="number" id="frames">
+    <br>
+    <button onclick="simulateFIFO()">Simulate FIFO</button>
+    <br>
+    <h2 id="output"></h2>
+
+    <script>
+    function simulateFIFO() {
+        var numPages = parseInt(document.getElementById("pages").value);
+        var pageList = document.getElementById("pageList").value.split(" ");
+        var pageSequence = document.getElementById("pageSequence").value.split(", ");
+        var numFrames = parseInt(document.getElementById("frames").value);
+
+        var frames = new Array(numFrames).fill("");
+        var pointer = 0;
+        var pageFault = 0;
+        var pageSuccess = 0;
+        var output = "FIFO Output: <br>";
+        output += "<table border='1'>";
+        output += "<tr><th>Number of Frames</th>";
+        for (var i = 0; i < pageSequence.length; i++) {
+            output += "<th>" + pageSequence[i] + "</th>";
+        }
+        output += "</tr>";
+
+        for (var j = 0; j < numFrames; j++) {
+            output += "<tr><td>Frame " + (j + 1)+ "</td>";
+            for (var k = 0; k < numPages; k++) {
+                output += "<td id='frame-" + j + "-page-" + k + "'></td>";
+            }
+            output += "</tr>";
+        }
+
+        output += "<tr><td>Outcome</td>";
+        for (var l = 0; l < numPages; l++) {
+            output += "<td></td>";
+        }
+        output += "</tr>";
+
+        pageSequence.forEach(function(page) {
+            if (pageList.includes(page)) {
+                var found = false;
+                frames.forEach(function(frame) {
+                    if (frame === page) {
+                        found = true;
+                    }
+                });
+                if (found) {
+                    pageSuccess++;
+                } else {
+                    pageFault++;
+                    frames[pointer] = page;
+                    pointer = (pointer + 1) % numFrames;
+                }
+            } else {
+                output += "Invalid page: " + page + "<br>";
+            }
+            output += "<tr><td></td>";
+            frames.forEach(function(frame, index) {
+                output += "<td id='frame-" + index + "-page-" + pageList.indexOf(frame) + "'>" + (frame === "" ? "*" : frame) + "</td>";
+            });
+            output += "</tr>";
+        });
+
+        output += "</table>";
+        output += "<br>";
+        output += "<br>";
+        output += "Page Fault: " + pageFault + "<br>";
+        output += "Page Success: " + pageSuccess + "<br>";
+        output += "Page Fault Rate: " + pageFault + "/" + (pageFault + pageSuccess) + "<br>";
+        output += "Page Success Rate: " + pageSuccess + "/" + (pageFault + pageSuccess) + "<br>";
+        output += "= " + (pageFault / (pageFault + pageSuccess)) + "<br>";
+        output += "= " + (pageSuccess / (pageFault + pageSuccess)) + "<br>";
+        output += "Page Fault Rate = " + (Math.round(pageFault / (pageFault + pageSuccess) * 100)) + "%<br>";
+        output += "Page Success Rate = " + (Math.round(pageSuccess / (pageFault + pageSuccess) * 100)) + "%<br>";
+
+        document.getElementById("output").innerHTML = output;
+    }
+</script>
+
+</body>
+</html>
